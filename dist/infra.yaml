@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploys quest infra as one stack for convenience
+Resources:
+  QuestIAM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/2b8fc385ddcb66a1876d69213e8867b3.template
+  QuestSG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/ac4b32374155f6d2d8e5cc361e7a5ee2.template
+  QuestRt53:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/1ded5a097b66479fd6c562da1b18b5b8.template
+  QuestECR:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/54e446be379d2c6badcba1be222da624.template
+  QuestALB:
+    DependsOn:
+    - QuestSG
+    - QuestRt53
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/5f2d6f5cfaf9cf2f532b4144718467d3.template
+  QuestCluster:
+    DependsOn:
+    - QuestIAM
+    - QuestSG
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/quest-artifacts/7befe755b2138a5d590d96b637681168.template

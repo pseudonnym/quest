@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: IAM roles for quest
+
+Resources:
+
+  QuestClusterIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+  QuestAppIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "QuestAppRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+  QuestIAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref QuestClusterIAMRole
+      InstanceProfileName: "QuestInstanceProfile"
+
+Outputs:
+
+  QuestAppIAMRole:
+    Value: !GetAtt QuestAppIAMRole.Arn
+    Export:
+      Name: "quest:AppTaskRole"
+  QuestClusterInstanceProfile:
+    Value: !GetAtt QuestIAMInstanceProfile.Arn
+    Export:
+      Name: "quest:ClusterInstanceProfile"

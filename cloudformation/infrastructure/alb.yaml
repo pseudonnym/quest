@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: ALB for Quest
+
+Resources:
+
+  QuestALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: ipv4
+      Name: "QuestInternalALB"
+      Scheme: internet-facing
+      SecurityGroups: 
+        - !ImportValue "quest:ALBSG"
+      Subnets:
+        - "subnet-4d474f2a"
+        - "subnet-571ac21a"
+        - "subnet-6cdbce30"
+      Type: application
+
+  QuestHTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:981354137213:certificate/91f1b3b8-0bab-4807-8bed-f5e1c0c34360
+      DefaultActions:
+        - TargetGroupArn: !Ref "QuestTargetGroup"
+          Type: forward
+      LoadBalancerArn: !Ref "QuestALB"
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: "ELBSecurityPolicy-FS-1-2-Res-2019-08"
+
+  QuestHTTPListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref "QuestTargetGroup"
+          Type: forward
+      LoadBalancerArn: !Ref "QuestALB"
+      Port: 80
+      Protocol: HTTP
+
+  QuestTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: "QuestALBDefaultTG"
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      VpcId: "vpc-4b604431"
+
+  QuestALBDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt QuestALB.DNSName
+        HostedZoneId: !GetAtt QuestALB.CanonicalHostedZoneID
+      HostedZoneId: !ImportValue quest:HostedZone
+      Name: "alb.quest.net"
+      Type: A
+
+Outputs:
+
+  QuestALB:
+    Value: !Ref QuestALB
+    Export:
+      Name: "quest:ALBARN"
+
+  QuestTargetGroup:
+    Value: !Ref QuestTargetGroup
+    Export:
+      Name: "quest:QuestTG"
+
+  QuestHTTPListenerExport:
+    Value: !Ref QuestHTTPListener
+    Export:
+      Name: "quest:HTTPListener"
+  
+  HTTPSListenerExport:
+    Value: !Ref QuestHTTPSListener
+    Export:
+      Name: "quest:HTTPSListener"

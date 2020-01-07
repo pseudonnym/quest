@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Security groups for Quest
+
+Resources:
+
+  QuestALBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: QuestALBSG
+      GroupDescription: SG for the ALB
+
+  QuestClusterSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: QuestClusterSG
+      GroupDescription: SG for the Cluster
+
+  ALBInboundRuleCluster:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 1024
+      ToPort: 65535
+      CidrIp: 172.31.0.0/16
+      GroupId:
+        Fn::GetAtt:
+        - QuestALBSG
+        - GroupId
+
+  ALBInboundRuleHTTP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+      GroupId:
+        Fn::GetAtt:
+        - QuestALBSG
+        - GroupId
+
+  ALBInboundRuleHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+      GroupId:
+        Fn::GetAtt:
+        - QuestALBSG
+        - GroupId
+
+  ClusterInboundRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 1024
+      ToPort: 65535
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - QuestALBSG
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - QuestClusterSG
+        - GroupId
+
+Outputs:
+
+  QuestALBSG:
+    Value: 
+      Fn::GetAtt:
+        - QuestALBSG
+        - GroupId
+    Export:
+      Name: "quest:ALBSG"
+
+  QuestClusterSG:
+    Value:
+      Fn::GetAtt:
+        - QuestClusterSG
+        - GroupId
+    Export:
+      Name: "quest:ClusterSG"

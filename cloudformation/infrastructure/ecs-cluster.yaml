@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Template to create a launch config, auto scaling group, and make it an ECS cluster
+
+Resources:
+
+  QuestLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      LaunchConfigurationName: "QuestLaunchConfig"
+      IamInstanceProfile: !ImportValue "quest:ClusterInstanceProfile"
+      ImageId: "ami-00afc256a955c31b5"
+      InstanceMonitoring: false
+      InstanceType: "t2.micro"
+      KeyName: "QuestKey"
+      SecurityGroups:
+        - !ImportValue "quest:ClusterSG"
+      UserData: !Base64
+        Fn::Join:
+          - ''
+          - - "#!/bin/bash \n"
+            - "echo ECS_CLUSTER=questcluster >> /etc/ecs/ecs.config \n"
+
+  QuestASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: "QuestASG"
+      VPCZoneIdentifier:
+        - "subnet-4d474f2a"
+        - "subnet-571ac21a"
+        - "subnet-6cdbce30"
+      LaunchConfigurationName: !Ref QuestLaunchConfig
+      DesiredCapacity: "1"
+      MaxSize: "3"
+      MinSize: "1"
+      Tags:
+        - Key: Name
+          Value: "QuestInstance"
+          PropagateAtLaunch: True
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: 1
+        MinInstancesInService: 1
+        SuspendProcesses:
+          - HealthCheck
+          - ReplaceUnhealthy
+          - AZRebalance
+          - AlarmNotification
+          - ScheduledActions
+
+  QuestScaleOutAlarmCPUReservation:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "QuestCPUReservationScaleOutAlarm"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      MetricName: CPUReservation
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 75
+      Statistic: Average
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref 'QuestCluster'
+      AlarmActions:
+        - !Ref 'QuestScaleOutEC2Policy'
+
+  QuestScaleInAlarmCPUReservation:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "QuestCPUReservationScaleInAlarm"
+      ComparisonOperator: LessThanOrEqualToThreshold
+      MetricName: CPUReservation
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 25
+      Statistic: Average
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref 'QuestCluster'
+      AlarmActions:
+        - !Ref 'QuestScaleInEC2Policy'
+
+  QuestScaleOutAlarmMemoryReservation:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "QuestMemoryReservationScaleOutAlarm"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      MetricName: MemoryReservation
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 75
+      Statistic: Average
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref 'QuestCluster'
+      AlarmActions:
+        - !Ref 'QuestScaleOutEC2Policy'
+        
+  QuestScaleInAlarmMemoryReservation:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "QuestMemoryReservationScaleInAlarm"
+      ComparisonOperator: LessThanOrEqualToThreshold
+      MetricName: MemoryReservation
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 25
+      Statistic: Average
+      Namespace: AWS/ECS
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref 'QuestCluster'
+      AlarmActions:
+        - !Ref 'QuestScaleInEC2Policy'
+
+  QuestScaleInEC2Policy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'QuestASG'
+      MetricAggregationType: Average
+      PolicyType: StepScaling
+      StepAdjustments:
+        - MetricIntervalUpperBound: 0
+          ScalingAdjustment: -1
+
+  QuestScaleOutEC2Policy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'QuestASG'
+      MetricAggregationType: Average
+      PolicyType: StepScaling
+      StepAdjustments:
+        - MetricIntervalLowerBound: 0
+          ScalingAdjustment: 1
+
+  QuestCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: questcluster
+
+Outputs:
+  QuestClusterArn:
+    Value: !GetAtt 'QuestCluster.Arn'
+    Export:
+      Name: 'quest:ClusterArn'

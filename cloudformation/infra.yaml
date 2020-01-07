@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Deploys quest infra as one stack for convenience 
+
+Resources:
+
+  QuestIAM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/iam.yaml
+
+  QuestSG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/sg.yaml
+
+  QuestRt53:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/rt53-zone.yaml
+
+  QuestECR:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/ecr.yaml
+
+  QuestALB:
+    DependsOn:
+      - QuestSG
+      - QuestRt53
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/alb.yaml
+
+  QuestCluster:
+    DependsOn:
+      - QuestIAM
+      - QuestSG
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./infrastructure/ecs-cluster.yaml

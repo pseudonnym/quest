@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Hosted zone for quest
+
+Resources:
+
+  QuestRoute53HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: "quest.net"
+      HostedZoneConfig:
+        Comment: "Hosted zone for Quest"
+      VPCs:
+        - VPCId: "vpc-4b604431"
+          VPCRegion: us-east-1
+
+Outputs:
+
+  QuestRoute53ZoneId:
+    Value: !Ref QuestRoute53HostedZone
+    Export:
+      Name: "quest:HostedZone"

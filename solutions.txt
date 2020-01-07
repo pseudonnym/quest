@@ -1,0 +1,9 @@
+/docker "Congratulations! You are running in a Docker container"
+/aws "Congratulations! You are running in AWS"
+/loadbalanced "Congratulations! Looks like you successfully configured an AWS loadbalancer"
+/tls "Congratulations! Looks like you successfully configured TLS (https)"
+/secret_word "Congratulations. Secret word is:  TwelveFactor"
+
+Hit all pages with adblockers disabled, noticed that / had trackers and made sure to hit each page incase you double check via analytics
+
+Secret page has a yoda gif https://www.rearc.io/wp-content/uploads/2019/07/quest.gif

@@ -70,12 +70,12 @@ Resources:
       ListenerArn: !ImportValue "quest:HTTPSListener"
       Priority: 1
 
-#  QuestRecord:
-#    Type: AWS::Route53::RecordSet
-#    Properties:
-#      ResourceRecords:
-#        - "alb.quest.net."
-#      HostedZoneId: !ImportValue "quest:HostedZone"
-#      Name: "endpoint.quest.net"
-#      Type: CNAME
-#      TTL: '300'
+  QuestRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      ResourceRecords:
+        - "alb.quest.net."
+      HostedZoneId: !ImportValue "quest:HostedZone"
+      Name: "endpoint.quest.net"
+      Type: CNAME
+      TTL: '300'

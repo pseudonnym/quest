@@ -62,4 +62,4 @@ describe: ## Show description of CloudFormation Stack
 		$(if $(value QUERY), --query '$(QUERY)',) \
 		$(if $(value FORMAT), --output '$(FORMAT)',)
 
-.PHONY: clean configure package deploy destroy describe parameters login build push
+.PHONY: clean configure package deploy destroy describe login build push

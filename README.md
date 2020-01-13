@@ -3,9 +3,9 @@
 ## Initial Conditions
 
 Quest Infrastructure uses default vpc and subnets  
-Have aws keys in your .aws/credentials file under the profile `[quest]`  
-Requires jq and cfssl `brew install jq cfssl`  
-`make build` docker daemon is running on the system  
+All AWS commands assume you have aws keys in your .aws/credentials file under the profile `[quest]`. You can either put credentials in place or change `AWS_PROFILE` in the Makefile and the profile specified in `ssl/tlsgen.sh`  
+Makefile targets require jq and cfssl `brew install jq cfssl`  
+`make build` assumes docker daemon is running on the system  
 `make login` assume you are using `bash`, if you are using an alternate shell please change `bash` to your shell on line 76 in `Makefile`
 
 ## TLS Cert

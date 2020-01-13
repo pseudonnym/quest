@@ -37,9 +37,6 @@ deploy-app: # Deploy CloudFormation Stack for quest app
 		--stack-name $(AWS_STACK_NAME) \
 		--no-fail-on-empty-changeset
 
-test:
-	@ echo $(AWS_SUBNET_IDS)
-
 deploy-infra: # Deploy CloudFormation Stack for quest infrastructure
 	@ aws cloudformation deploy \
 		--profile $(AWS_PROFILE) \

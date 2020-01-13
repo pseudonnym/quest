@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Repository for Quest image
 
+Parameters:
+  
+  IAMARN:
+    Description: ARN to give access to the ECR
+    Type: String
+
 Resources:
 
   QuestECR:
@@ -16,7 +22,7 @@ Resources:
             Effect: Allow
             Principal: 
               AWS: 
-                - "arn:aws:iam::981354137213:user/donreinert"
+                - !Ref IAMARN
             Action: 
               - "ecr:GetDownloadUrlForLayer"
               - "ecr:BatchGetImage"

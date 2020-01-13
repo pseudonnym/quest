@@ -2,6 +2,24 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Deploys quest infra as one stack for convenience 
 
+Parameters:
+
+  SubnetList:
+    Description: Subnets to deploy ALB into
+    Type: String
+
+  VPCID:
+    Description: AWS VPC to deploy ALB into
+    Type: String
+
+  IAMARN:
+    Description: ARN to give access to the ECR
+    Type: String
+
+  ECSAMI:
+    Description: AMI of current Amazon linux 2 ECS optimized AMI
+    Type: String
+
 Resources:
 
   QuestIAM:
@@ -17,11 +35,15 @@ Resources:
   QuestRt53:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        VPCID: !Ref VPCID
       TemplateURL: ./infrastructure/rt53-zone.yaml
 
   QuestECR:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        IAMARN: !Ref IAMARN
       TemplateURL: ./infrastructure/ecr.yaml
 
   QuestALB:
@@ -30,6 +52,9 @@ Resources:
       - QuestRt53
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        SubnetList: !Ref SubnetList
+        VPCID: !Ref VPCID
       TemplateURL: ./infrastructure/alb.yaml
 
   QuestCluster:
@@ -38,4 +63,7 @@ Resources:
       - QuestSG
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        SubnetList: !Ref SubnetList
+        ECSAMI: !Ref ECSAMI
       TemplateURL: ./infrastructure/ecs-cluster.yaml

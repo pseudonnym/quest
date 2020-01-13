@@ -2,6 +2,16 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Template to create a launch config, auto scaling group, and make it an ECS cluster
 
+Parameters:
+  
+  ECSAMI:
+    Description: AMI of current Amazon linux 2 ECS optimized AMI
+    Type: String
+
+  SubnetList:
+    Description: Subnets to deploy ALB into
+    Type: CommaDelimitedList
+
 Resources:
 
   QuestLaunchConfig:
@@ -9,7 +19,7 @@ Resources:
     Properties:
       LaunchConfigurationName: "QuestLaunchConfig"
       IamInstanceProfile: !ImportValue "quest:ClusterInstanceProfile"
-      ImageId: "ami-00afc256a955c31b5"
+      ImageId: !Ref ECSAMI
       InstanceMonitoring: false
       InstanceType: "t2.micro"
       KeyName: "QuestKey"
@@ -25,10 +35,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       AutoScalingGroupName: "QuestASG"
-      VPCZoneIdentifier:
-        - "subnet-4d474f2a"
-        - "subnet-571ac21a"
-        - "subnet-6cdbce30"
+      VPCZoneIdentifier: !Ref SubnetList
       LaunchConfigurationName: !Ref QuestLaunchConfig
       DesiredCapacity: "1"
       MaxSize: "3"

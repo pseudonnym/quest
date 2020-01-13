@@ -23,7 +23,7 @@ Resources:
             - Name: SECRET_WORD
               Value: "TwelveFactor"
           Essential: true
-          Image: 981354137213.dkr.ecr.us-east-1.amazonaws.com/quest:latest
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.us-east-1.amazonaws.com/quest:latest
 
   QuestAppService:
     DependsOn: QuestListenerRuleHTTP

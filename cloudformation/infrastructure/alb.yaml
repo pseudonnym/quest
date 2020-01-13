@@ -2,6 +2,16 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: ALB for Quest
 
+Parameters:
+
+  SubnetList:
+    Description: Subnets to deploy ALB into
+    Type: CommaDelimitedList
+
+  VPCID:
+    Description: AWS VPC to deploy ALB into
+    Type: String
+
 Resources:
 
   QuestALB:
@@ -12,17 +22,14 @@ Resources:
       Scheme: internet-facing
       SecurityGroups: 
         - !ImportValue "quest:ALBSG"
-      Subnets:
-        - "subnet-4d474f2a"
-        - "subnet-571ac21a"
-        - "subnet-6cdbce30"
+      Subnets: !Ref SubnetList
       Type: application
 
   QuestHTTPSListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       Certificates:
-        - CertificateArn: arn:aws:acm:us-east-1:981354137213:certificate/91f1b3b8-0bab-4807-8bed-f5e1c0c34360
+        - CertificateArn: arn:aws:acm:us-east-1:981354137213:certificate/1f227e28-4f3e-40ee-a57f-f387d8a0fd35
       DefaultActions:
         - TargetGroupArn: !Ref "QuestTargetGroup"
           Type: forward
@@ -48,7 +55,7 @@ Resources:
       Port: 80
       Protocol: HTTP
       TargetType: instance
-      VpcId: "vpc-4b604431"
+      VpcId: !Ref VPCID
 
   QuestALBDNSRecord:
     Type: AWS::Route53::RecordSet

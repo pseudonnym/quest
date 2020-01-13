@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Hosted zone for quest
 
+Parameters:
+
+  VPCID:
+    Description: AWS VPC to deploy ALB into
+    Type: String
+
 Resources:
 
   QuestRoute53HostedZone:
@@ -11,8 +17,8 @@ Resources:
       HostedZoneConfig:
         Comment: "Hosted zone for Quest"
       VPCs:
-        - VPCId: "vpc-4b604431"
-          VPCRegion: us-east-1
+        - VPCId: !Ref VPCID
+          VPCRegion: !Ref AWS::Region
 
 Outputs:
 

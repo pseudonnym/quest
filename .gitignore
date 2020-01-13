@@ -1,1 +1,7 @@
 dist
+ssl/ca-key.pem
+ssl/ca.csr
+ssl/ca.pem
+ssl/server-key.pem
+ssl/server.csr
+ssl/server.pem
